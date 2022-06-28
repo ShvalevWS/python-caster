@@ -73,8 +73,6 @@ class Caster:
                     auth = i
                 elif 'GET' in i:
                     method = i.split()
-                else:
-                    print('WRONG REQUEST')
         return auth, method[1], method[0]
 
 
