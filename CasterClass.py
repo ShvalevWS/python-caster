@@ -14,7 +14,7 @@ class Tools:
         for (raw_data, parsed_data) in self.rtr:
             if '<RTCM(1005' in str(parsed_data):
                 print(f'Got 1005 RTCM string  -  {parsed_data}')
-                break
+                return True
             else:
                 print('Searching')
                 continue
