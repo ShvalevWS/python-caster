@@ -14,16 +14,10 @@ class Tools:
         for (raw_data, parsed_data) in self.rtr:
             if '<RTCM(1005' in str(parsed_data):
                 print(f'Got 1005 RTCM string  -  {parsed_data}')
-                searching = False
                 break
             else:
-                print('Search')
-                searching = True
+                print('Searching')
                 continue
-        if searching == True:
-            return False
-        else:
-            return True
 
 
     def print_parsed(self):
@@ -42,16 +36,22 @@ class Tools:
                 print(final)
 
 
-    def make_list(self):
+    def make_line(self, dataclass='raw_data'):
+        string = b''
+        count = 0
         lst = []
         for (raw_data, parsed_data) in self.rtr:
-            if len(lst) < 10:
-                lst.append(raw_data)
-                continue
+            if count < 10 and '<RTCM(4072' in str(parsed_data):
+                lst.append(dataclass)
+                count += 1
             else:
                 print('List collected. Formatting now!')
                 break
-        return lst
+        for elems in lst:
+            if string == b'':
+                string.join(elems)
+        return string
+
 
 
 class Caster:
@@ -63,16 +63,18 @@ class Caster:
 
     def parse_headers(self, request):
         heads = []
+        auth = ''
+        method = ''
         reqst_text = request.split('\r\n')
         for elms in reqst_text:
-            if len(heads) < 6:
-                heads.append(elms)
-            else:
-                break
-        method = heads[0].split()
-        ntrip_version = heads[1]
-        user_agent = heads[2]
-        auth = heads[-1].split(':')[1][7:]
+            heads.append(elms)
+            for i in heads:
+                if 'Authorization:' in i:
+                    auth = i
+                elif 'GET' in i:
+                    method = i.split()
+                else:
+                    print('WRONG REQUEST')
         return auth, method[1], method[0]
 
 
@@ -125,10 +127,8 @@ class Caster:
                     and cast.mountpt_check(mount=cast.parse_headers(request=request)[1]) == True \
                     and cast.method_check(method=cast.parse_headers(request=request)[2]):
                 try:
-                    for elems in tools.make_list():
-                        response = elems
-                        client_connection.send(response)
-                    print(f"We're sent - {response}")
+                    response = tools.make_line()
+                    client_connection.sendall(response)
                 except Exception as e:
                     print(e)
             elif '$GNGGA' in request:
