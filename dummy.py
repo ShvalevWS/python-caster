@@ -2,7 +2,7 @@ from CasterClass import *
 
 tools = Tools()
 
-tools.make_line()
+print(tools.make_line())
 
 
 # def parse_headers(self, request):
