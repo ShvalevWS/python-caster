@@ -36,13 +36,13 @@ class Tools:
                 print(final)
 
 
-    def make_line(self, dataclass='raw_data'):
+    def make_line(self):
         string = b''
         count = 0
         lst = []
         for (raw_data, parsed_data) in self.rtr:
             if count < 10 and '<RTCM(4072' in str(parsed_data):
-                lst.append(dataclass)
+                lst.append(raw_data)
                 count += 1
             else:
                 print('List collected. Formatting now!')
