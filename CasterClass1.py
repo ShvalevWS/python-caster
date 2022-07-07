@@ -47,8 +47,8 @@ class Tools:
             else:
                 print('List collected. Formatting now!')
                 break
-        string = b''.join(lst)
-        return string
+        #string = b''.join(lst)
+        return lst
 
 
 

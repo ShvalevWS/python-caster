@@ -1,7 +1,5 @@
 from pyrtcm import RTCMReader
-import serial
-import socket
-import base64
+import serial, base64, socket, threading, asyncio
 
 
 class Tools:
@@ -40,16 +38,39 @@ class Tools:
         count = 0
         lst = []
         for (raw_data, parsed_data) in self.rtr:
-            RTCM = ['<RTCM(4072', '<RTCM(1077', '<RTCM(1097', '<RTCM(1127', '<RTCM(1230', '<RTCM(1005']
-            if count < 15 or str(parsed_data) in RTCM:
+            RTCM = ['<RTCM(4072', '<RTCM(1077', '<RTCM(1087', '<RTCM(1097', '<RTCM(1127', '<RTCM(1230', '<RTCM(1005']
+            if RTCM[0] in str(parsed_data):
                 lst.append(raw_data)
+                print('Writting 4072')
                 count += 1
-            else:
+            elif RTCM[1] in str(parsed_data):
+                lst.append(raw_data)
+                print('Writting 1077')
+                count += 1
+            elif RTCM[2] in str(parsed_data):
+                lst.append(raw_data)
+                print('Writting 1097')
+                count += 1
+            elif RTCM[3] in str(parsed_data):
+                lst.append(raw_data)
+                print('Writting 1097')
+                count += 1
+            elif RTCM[4] in str(parsed_data):
+                lst.append(raw_data)
+                print('Writting 1127')
+                count += 1
+            elif RTCM[5] in str(parsed_data):
+                lst.append(raw_data)
+                print('Writting 1230')
+                count += 1
+            elif RTCM[6] in str(parsed_data):
+                lst.append(raw_data)
+                print('Writting 1005')
+                count += 1
                 print('List collected. Formatting now!')
                 break
         string = b''.join(lst)
         return string
-
 
 
 class Caster:
@@ -63,6 +84,7 @@ class Caster:
         heads = []
         auth = ''
         method = ''
+        gngga = ''
         reqst_text = request.split('\r\n')
         for elms in reqst_text:
             heads.append(elms)
@@ -71,7 +93,9 @@ class Caster:
                     auth = i.split(':')[1][7:]
                 elif 'GET' in i:
                     method = i.split()
-        return auth, method[1], method[0]
+                elif '$GNGGA' in i:
+                    gngga = i
+        return auth, method[1], method[0], gngga
 
 
     def authentication(self, auth):
@@ -105,6 +129,15 @@ class Caster:
             return False
 
 
+    def gngga_check(self, gngga):
+        if '$GNGGA' in gngga:
+            print('yes')
+            return True
+        else:
+            print('no')
+            return False
+
+
     def castering(self, host, port):
         tools = Tools()
         cast = Caster()
@@ -125,12 +158,11 @@ class Caster:
                 try:
                     response = tools.make_line()
                     client_connection.sendall(response)
-                    print(f"We're sent - {response}")
+                    print(f'Were sent {response}')
                 except Exception as e:
                     print(e)
-            elif '$GNGGA' in request:
-                pass
             else:
                 response = b'Sorry, your request method/creds/mountpoint is wrong. Bye-bye!'
                 client_connection.sendall(response)
                 client_connection.close()
+
