@@ -6,7 +6,7 @@ cast = Caster()
 
 def main():
     if tools.get_line():
-        cast.castering('127.0.0.1', 2101)
+        cast.castering('192.168.100.12', 2101)
 
 
 if __name__ == '__main__':

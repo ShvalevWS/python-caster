@@ -37,19 +37,17 @@ class Tools:
 
 
     def make_line(self):
-        string = b''
         count = 0
         lst = []
         for (raw_data, parsed_data) in self.rtr:
-            if count < 10 and '<RTCM(4072' in str(parsed_data):
+            RTCM = ['<RTCM(4072', '<RTCM(1077', '<RTCM(1097', '<RTCM(1127', '<RTCM(1230', '<RTCM(1005']
+            if count < 10 and str(parsed_data) in RTCM:
                 lst.append(raw_data)
                 count += 1
             else:
                 print('List collected. Formatting now!')
                 break
-        for elems in lst:
-            if string == b'':
-                string.join(elems)
+        string = b''.join(lst)
         return string
 
 
@@ -70,7 +68,7 @@ class Caster:
             heads.append(elms)
             for i in heads:
                 if 'Authorization:' in i:
-                    auth = i
+                    auth = i.split(':')[1][7:]
                 elif 'GET' in i:
                     method = i.split()
         return auth, method[1], method[0]
